@@ -562,17 +562,17 @@ func (p *TCompactProtocol) ReadString() (value string, err error) {
 	if length < 0 {
 		return "", invalidDataLength
 	}
-
 	if length == 0 {
 		return "", nil
 	}
-	var buf []byte
-	if length <= int32(len(p.buffer)) {
-		buf = p.buffer[0:length]
-	} else {
-		buf = make([]byte, length)
+	if length < int32(len(p.buffer)) {
+		// Avoid allocation on small reads
+		buf := p.buffer[:length]
+		read, e := io.ReadFull(p.trans, buf)
+		return string(buf[:read]), NewTProtocolException(e)
 	}
-	_, e = io.ReadFull(p.trans, buf)
+
+	buf, e := safeReadBytes(length, p.trans)
 	return string(buf), NewTProtocolException(e)
 }
 
@@ -589,8 +589,7 @@ func (p *TCompactProtocol) ReadBinary() (value []byte, err error) {
 		return nil, invalidDataLength
 	}
 
-	buf := make([]byte, length)
-	_, e = io.ReadFull(p.trans, buf)
+	buf, e := safeReadBytes(length, p.trans)
 	return buf, NewTProtocolException(e)
 }
 
