@@ -433,8 +433,8 @@ func (p *TCompactProtocol) ReadMapBegin() (keyType TType, valueType TType, size 
 		err = NewTProtocolException(e)
 		return
 	}
-	if size32 < 0 {
-		err = invalidDataLength
+	err = checkSizeForProtocol(size32)
+	if err != nil {
 		return
 	}
 	size = int(size32)
@@ -469,11 +469,11 @@ func (p *TCompactProtocol) ReadListBegin() (elemType TType, size int, err error)
 			err = NewTProtocolException(e)
 			return
 		}
-		if size2 < 0 {
-			err = invalidDataLength
-			return
-		}
 		size = int(size2)
+	}
+	err = checkSizeForProtocol(size32)
+	if err != nil {
+		return
 	}
 	elemType, e := p.getTType(tCompactType(size_and_type))
 	if e != nil {
