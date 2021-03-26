@@ -320,8 +320,8 @@ func (p *TBinaryProtocol) ReadMapBegin() (kType, vType TType, size int, err erro
 		err = NewTProtocolException(e)
 		return
 	}
-	if size32 < 0 {
-		err = invalidDataLength
+	err = checkSizeForProtocol(size32)
+	if err != nil {
 		return
 	}
 	size = int(size32)
@@ -344,8 +344,8 @@ func (p *TBinaryProtocol) ReadListBegin() (elemType TType, size int, err error) 
 		err = NewTProtocolException(e)
 		return
 	}
-	if size32 < 0 {
-		err = invalidDataLength
+	err = checkSizeForProtocol(size32)
+	if err != nil {
 		return
 	}
 	size = int(size32)
@@ -369,8 +369,8 @@ func (p *TBinaryProtocol) ReadSetBegin() (elemType TType, size int, err error) {
 		err = NewTProtocolException(e)
 		return
 	}
-	if size32 < 0 {
-		err = invalidDataLength
+	err = checkSizeForProtocol(size32)
+	if err != nil {
 		return
 	}
 	size = int(size32)
@@ -428,8 +428,8 @@ func (p *TBinaryProtocol) ReadString() (value string, err error) {
 	if e != nil {
 		return "", e
 	}
-	if size < 0 {
-		err = invalidDataLength
+	err = checkSizeForProtocol(size)
+	if err != nil {
 		return
 	}
 	if size == 0 {

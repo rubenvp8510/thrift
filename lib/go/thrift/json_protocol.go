@@ -311,9 +311,13 @@ func (p *TJSONProtocol) ReadMapBegin() (keyType TType, valueType TType, size int
 	}
 
 	// read size
-	iSize, e := p.ReadI64()
-	if e != nil {
-		return keyType, valueType, size, e
+	iSize, err := p.ReadI64()
+	if err != nil {
+		return keyType, valueType, size, err
+	}
+	err = checkSizeForProtocol(int32(iSize))
+	if err != nil {
+		return keyType, valueType, 0, err
 	}
 	size = int(iSize)
 
@@ -481,9 +485,16 @@ func (p *TJSONProtocol) ParseElemListBegin() (elemType TType, size int, e error)
 	if err != nil {
 		return elemType, size, err
 	}
-	nSize, err2 := p.ReadI64()
+	nSize, _, err := p.ParseI64()
+	if err != nil {
+		return elemType, 0, err
+	}
+	err = checkSizeForProtocol(int32(nSize))
+	if err != nil {
+		return elemType, 0, err
+	}
 	size = int(nSize)
-	return elemType, size, err2
+	return elemType, size, nil
 }
 
 func (p *TJSONProtocol) readElemListBegin() (elemType TType, size int, e error) {
